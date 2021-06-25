@@ -1,6 +1,3 @@
-// import ccxt from "ccxt";
-import { Ftx } from "./ftx";
-import { Okex } from "./okex";
 import { GenericExchange } from "./GenericExchange";
 
 const ftxApiKey = process.env.FTX_KEY;
@@ -13,8 +10,6 @@ const ftxSymbol = "BTC-PERP";
 const okexSymbol = "BTC/USDT";
 
 function main() {
-  //   const ftx = new Ftx();
-  //   const okex = new Okex();
   const ftx = new GenericExchange("ftx", ftxApiKey, ftxApiSecret, ftxSymbol);
   const okex = new GenericExchange(
     "okex",
