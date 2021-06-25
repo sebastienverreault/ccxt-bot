@@ -2,6 +2,7 @@ import ccxt, { ExchangeId } from "ccxt";
 import fs from "fs";
 
 export class GenericExchange {
+  tempDir;
   exchangeName;
   exchange;
   symbol;
@@ -12,6 +13,7 @@ export class GenericExchange {
     secret: string | undefined,
     symbol: string
   ) {
+    this.tempDir = 'temp-data'
     this.exchangeName = exchangeName;
     this.symbol = symbol;
     const exchangeId = this.exchangeName as ExchangeId;
@@ -60,7 +62,7 @@ export class GenericExchange {
       }
     }
 
-    const filename = `./${this.exchangeName}.${type}.json`;
+    const filename = `${this.tempDir}/${this.exchangeName}.${type}.json`;
     fs.writeFile(filename, data, function (err) {
       if (err) return console.log(err);
     });
@@ -68,7 +70,7 @@ export class GenericExchange {
 
   // Sub-class this to implement exchange specific method
   public async getStats() {
-    const filename = `./${this.exchangeName}.stats.json`;
+    const filename = `${this.tempDir}/${this.exchangeName}.stats.json`;
     let data = "";
     if (this.exchangeName === "ftx") {
       data = JSON.stringify(
@@ -90,7 +92,7 @@ export class GenericExchange {
   }
 
   public async getMethods() {
-    const filename = `./${this.exchangeName}.methods.json`;
+    const filename = `${this.tempDir}/${this.exchangeName}.methods.json`;
     const data = Object.keys(this.exchange).join("\n").toString();
     fs.writeFile(filename, data, function (err) {
       if (err) return console.log(err);
@@ -99,7 +101,7 @@ export class GenericExchange {
 
   public async getMarkets() {
     const markets = await this.exchange.loadMarkets();
-    const filename = `./${this.exchangeName}.market.json`;
+    const filename = `${this.tempDir}/${this.exchangeName}.market.json`;
     fs.writeFile(filename, JSON.stringify(markets), function (err) {
       if (err) return console.log(err);
     });
