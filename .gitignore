@@ -37,3 +37,5 @@ artifacts
 
 .env
 .envrc
+
+temp-data
