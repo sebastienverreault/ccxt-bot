@@ -1,0 +1,74 @@
+symbol = BTC-USD-210702
+Market = {
+    "limits": {
+        "amount": {},
+        "price": {
+            "min": 0.1
+        },
+        "cost": {}
+    },
+    "precision": {
+        "amount": 1,
+        "price": 0.1
+    },
+    "taker": 0.0005,
+    "maker": 0.0002,
+    "id": "BTC-USD-210702",
+    "symbol": "BTC-USD-210702",
+    "base": "BTC",
+    "quote": "USD",
+    "baseId": "BTC",
+    "quoteId": "USD",
+    "info": {
+        "instrument_id": "BTC-USD-210702",
+        "underlying_index": "BTC",
+        "quote_currency": "USD",
+        "tick_size": "0.1",
+        "contract_val": "100",
+        "listing": "2021-06-18",
+        "delivery": "2021-07-02",
+        "trade_increment": "1",
+        "alias": "this_week",
+        "underlying": "BTC-USD",
+        "base_currency": "BTC",
+        "settlement_currency": "BTC",
+        "is_inverse": "true",
+        "contract_val_currency": "USD",
+        "category": "1"
+    },
+    "type": "futures",
+    "spot": false,
+    "futures": true,
+    "swap": false,
+    "option": false,
+    "active": true
+}
+Ticker = {
+    "symbol": "BTC-USD-210702",
+    "timestamp": 1624636415840,
+    "datetime": "2021-06-25T15:53:35.840Z",
+    "high": 35475.9,
+    "low": 32314.7,
+    "bid": 32721.8,
+    "bidVolume": 55,
+    "ask": 32738.2,
+    "askVolume": 65,
+    "close": 32735.6,
+    "last": 32735.6,
+    "info": {
+        "instrument_id": "BTC-USD-210702",
+        "last": "32735.6",
+        "best_bid": "32721.8",
+        "best_ask": "32738.2",
+        "high_24h": "35475.9",
+        "low_24h": "32314.7",
+        "volume_24h": "4614365",
+        "timestamp": "2021-06-25T15:53:35.840Z",
+        "last_qty": "369",
+        "best_ask_size": "65",
+        "best_bid_size": "55",
+        "volume_token_24h": "13639.0883",
+        "open_utc0": "34625",
+        "open_utc8": "33832.9"
+    }
+}

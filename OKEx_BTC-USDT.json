@@ -1,0 +1,77 @@
+symbol = BTC/USDT
+Market = {
+    "limits": {
+        "amount": {
+            "min": 0.00001
+        },
+        "price": {
+            "min": 0.1
+        },
+        "cost": {
+            "min": 0.000001
+        }
+    },
+    "precision": {
+        "amount": 1e-8,
+        "price": 0.1
+    },
+    "taker": 0.0015,
+    "maker": 0.001,
+    "id": "BTC-USDT",
+    "symbol": "BTC/USDT",
+    "base": "BTC",
+    "quote": "USDT",
+    "baseId": "BTC",
+    "quoteId": "USDT",
+    "info": {
+        "base_currency": "BTC",
+        "category": "1",
+        "instrument_id": "BTC-USDT",
+        "min_size": "0.00001",
+        "quote_currency": "USDT",
+        "size_increment": "0.00000001",
+        "tick_size": "0.1"
+    },
+    "type": "spot",
+    "spot": true,
+    "futures": false,
+    "swap": false,
+    "option": false,
+    "active": true
+}
+Ticker = {
+    "symbol": "BTC/USDT",
+    "timestamp": 1624636404412,
+    "datetime": "2021-06-25T15:53:24.412Z",
+    "high": 35490.2,
+    "low": 32342.7,
+    "bid": 32783.1,
+    "bidVolume": 0.03529159,
+    "ask": 32783.2,
+    "askVolume": 2.76988639,
+    "open": 33987.6,
+    "close": 32777.4,
+    "last": 32777.4,
+    "baseVolume": 26990.95811738,
+    "quoteVolume": 920735433.1,
+    "info": {
+        "best_ask": "32783.2",
+        "best_bid": "32783.1",
+        "instrument_id": "BTC-USDT",
+        "open_utc0": "34661.1",
+        "open_utc8": "33879.6",
+        "product_id": "BTC-USDT",
+        "last": "32777.4",
+        "last_qty": "0.00001",
+        "ask": "32783.2",
+        "best_ask_size": "2.76988639",
+        "bid": "32783.1",
+        "best_bid_size": "0.03529159",
+        "open_24h": "33987.6",
+        "high_24h": "35490.2",
+        "low_24h": "32342.7",
+        "base_volume_24h": "26990.95811738",
+        "timestamp": "2021-06-25T15:53:24.412Z",
+        "quote_volume_24h": "920735433.1"
+    }
+}
