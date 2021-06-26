@@ -5,13 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc",
     "start": "npx tsc && node lib/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ccxt": "^1.51.98"
+    "@types/dateformat": "^3.0.1",
+    "ccxt": "^1.51.98",
+    "dateformat": "^4.5.1"
   },
   "devDependencies": {
     "@jest/test-sequencer": "^27.0.5",

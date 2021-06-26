@@ -1,7 +1,10 @@
 import ccxt, { ExchangeId } from "ccxt";
 import fs from "fs";
+import dateFormat from "dateformat";
+import path from "path"
 
 export class GenericExchange {
+  dateFormatString
   tempDir;
   exchangeName;
   exchange;
@@ -13,6 +16,7 @@ export class GenericExchange {
     secret: string | undefined,
     symbol: string
   ) {
+    this.dateFormatString = "yyyymmdd.HHMMss";
     this.tempDir = 'temp-data'
     this.exchangeName = exchangeName;
     this.symbol = symbol;
@@ -62,7 +66,9 @@ export class GenericExchange {
       }
     }
 
-    const filename = `${this.tempDir}/${this.exchangeName}.${type}.json`;
+    const datetime = dateFormat(new Date(), this.dateFormatString);
+    const filename = path.join(this.tempDir, `${this.exchangeName}.${type}.${datetime}.json`)
+    // const filename = `${this.tempDir}/${this.exchangeName}.${type}.${datetime}.json`;
     fs.writeFile(filename, data, function (err) {
       if (err) return console.log(err);
     });
@@ -70,7 +76,8 @@ export class GenericExchange {
 
   // Sub-class this to implement exchange specific method
   public async getStats() {
-    const filename = `${this.tempDir}/${this.exchangeName}.stats.json`;
+    const datetime = dateFormat(new Date(), this.dateFormatString);
+    const filename = path.join(this.tempDir, `${this.exchangeName}.stats.${datetime}.json`);
     let data = "";
     if (this.exchangeName === "ftx") {
       data = JSON.stringify(
@@ -92,7 +99,8 @@ export class GenericExchange {
   }
 
   public async getMethods() {
-    const filename = `${this.tempDir}/${this.exchangeName}.methods.json`;
+    const datetime = dateFormat(new Date(), this.dateFormatString);
+    const filename = path.join(this.tempDir, `${this.exchangeName}.methods.${datetime}.json`);
     const data = Object.keys(this.exchange).join("\n").toString();
     fs.writeFile(filename, data, function (err) {
       if (err) return console.log(err);
@@ -101,7 +109,8 @@ export class GenericExchange {
 
   public async getMarkets() {
     const markets = await this.exchange.loadMarkets();
-    const filename = `${this.tempDir}/${this.exchangeName}.market.json`;
+    const datetime = dateFormat(new Date(), this.dateFormatString);
+    const filename = path.join(this.tempDir, `${this.exchangeName}.market.${datetime}.json`);
     fs.writeFile(filename, JSON.stringify(markets), function (err) {
       if (err) return console.log(err);
     });
