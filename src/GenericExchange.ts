@@ -3,6 +3,9 @@ import fs from "fs";
 import dateFormat from "dateformat";
 import path from "path"
 
+const DATE_FORMAT_STRING = "yyyymmdd.HHMMss";
+const TEMP_DIR = 'temp-data';
+
 export class GenericExchange {
   dateFormatString
   tempDir;
@@ -14,10 +17,11 @@ export class GenericExchange {
     exchangeName: string,
     apiKey: string | undefined,
     secret: string | undefined,
+    password: string | undefined,
     symbol: string
   ) {
-    this.dateFormatString = "yyyymmdd.HHMMss";
-    this.tempDir = 'temp-data'
+    this.dateFormatString = DATE_FORMAT_STRING;
+    this.tempDir = TEMP_DIR
     this.exchangeName = exchangeName;
     this.symbol = symbol;
     const exchangeId = this.exchangeName as ExchangeId;
@@ -25,15 +29,59 @@ export class GenericExchange {
     this.exchange = new exchangeClass({
       apiKey: apiKey,
       secret: secret,
+      password: password,
     });
     console.log(this.exchange.requiredCredentials);
+    console.log(this.exchange.checkRequiredCredentials());
   }
 
-  public async getExchangeBalance() {
-    const balance = await this.exchange.fetchBalance();
-    // console.log(`BTC: ${balance.total.BTC ?? 0}`);
-    // console.log(`USD: ${balance.total.USD}`);
-    console.log(`balance object: ${balance}`);
+  async has() {
+    const has = this.exchange.has;
+    const data = JSON.stringify(has);
+
+    const datetime = dateFormat(new Date(), this.dateFormatString);
+    const filename = path.join(this.tempDir, `${this.exchangeName}.has.${datetime}.json`)
+    fs.writeFile(filename, data, function (err) {
+      if (err) return console.log(err);
+    });
+  }
+
+
+  async exchangeDepositAddress() {
+    const address = await this.exchange.fetchDepositAddress("BTC")
+    const data = JSON.stringify(address);
+    // console.log(data);
+
+    const datetime = dateFormat(new Date(), this.dateFormatString);
+    const filename = path.join(this.tempDir, `${this.exchangeName}.deposit.address.${datetime}.json`)
+    fs.writeFile(filename, data, function (err) {
+      if (err) return console.log(err);
+    });
+  }
+
+
+  public async getPositions() {
+    const positions = await this.exchange.fetchPositions();
+    const data = JSON.stringify(positions);
+    // console.log(`positions object: ${data}`);
+
+    const datetime = dateFormat(new Date(), this.dateFormatString);
+    const filename = path.join(this.tempDir, `${this.exchangeName}.positions.${datetime}.json`)
+    fs.writeFile(filename, data, function (err) {
+      if (err) return console.log(err);
+    });
+  }
+
+  public async getBalances() {
+    const balances = await this.exchange.fetchBalance();
+    const data = JSON.stringify(balances.info);
+    // console.log(`balances: ${data}`);
+
+    const datetime = dateFormat(new Date(), this.dateFormatString);
+    const filename = path.join(this.tempDir, `${this.exchangeName}.balances.${datetime}.json`)
+    fs.writeFile(filename, data, function (err) {
+      if (err) return console.log(err);
+    });
   }
 
   public async getBtcSpot() {
@@ -68,7 +116,6 @@ export class GenericExchange {
 
     const datetime = dateFormat(new Date(), this.dateFormatString);
     const filename = path.join(this.tempDir, `${this.exchangeName}.${type}.${datetime}.json`)
-    // const filename = `${this.tempDir}/${this.exchangeName}.${type}.${datetime}.json`;
     fs.writeFile(filename, data, function (err) {
       if (err) return console.log(err);
     });
@@ -86,7 +133,7 @@ export class GenericExchange {
           future_name: this.symbol,
         })
       );
-    } else if (this.exchangeName === "okex") {
+    } else if (this.exchangeName === "okex" || this.exchangeName === "okex5") {
       data = JSON.stringify(
         this.exchange.fetchFundingFees({
           future_name: this.symbol,
