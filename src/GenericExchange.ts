@@ -1,10 +1,20 @@
-import ccxt, { ExchangeId } from "ccxt";
+import ccxt, { ExchangeId, Order } from "ccxt";
 import fs from "fs";
 import dateFormat from "dateformat";
 import path from "path"
 
 const DATE_FORMAT_STRING = "yyyymmdd.HHMMss";
 const TEMP_DIR = 'temp-data';
+
+export class ApiConfig {
+  constructor(
+    public apiKey: string | undefined,
+    public secret: string | undefined,
+    public password: string | undefined
+  ) {
+    ;
+  };
+}
 
 export class GenericExchange {
   dateFormatString
@@ -13,11 +23,11 @@ export class GenericExchange {
   exchange;
   symbol;
 
+  // public ccxt;
+
   constructor(
     exchangeName: string,
-    apiKey: string | undefined,
-    secret: string | undefined,
-    password: string | undefined,
+    apiConfig: ApiConfig,
     symbol: string
   ) {
     this.dateFormatString = DATE_FORMAT_STRING;
@@ -27,15 +37,23 @@ export class GenericExchange {
     const exchangeId = this.exchangeName as ExchangeId;
     const exchangeClass = ccxt[exchangeId];
     this.exchange = new exchangeClass({
-      apiKey: apiKey,
-      secret: secret,
-      password: password,
+      apiKey: apiConfig.apiKey,
+      secret: apiConfig.secret,
+      password: apiConfig.password,
     });
+    // this.ccxt = this.exchange;
     console.log(this.exchange.requiredCredentials);
     console.log(this.exchange.checkRequiredCredentials());
   }
 
-  async has() {
+  public GetSymbol() {
+    // Should resolve best instrument to used given the exchange and the market conditions.
+    const optimalSymbol = this.symbol;
+    this.symbol = optimalSymbol;
+    return this.symbol;
+  }
+
+  public has() {
     const has = this.exchange.has;
     const data = JSON.stringify(has);
 
@@ -46,9 +64,18 @@ export class GenericExchange {
     });
   }
 
+  public has2() {
+    const has = this.exchange.has;
+    return has;
+  }
 
-  async exchangeDepositAddress() {
-    const address = await this.exchange.fetchDepositAddress("BTC")
+  public name() {
+    const name = this.exchange.name;
+    return name;
+  }
+
+  async fetchDepositAddress(currency: string) {
+    const address = await this.exchange.fetchDepositAddress(currency)
     const data = JSON.stringify(address);
     // console.log(data);
 
@@ -59,6 +86,20 @@ export class GenericExchange {
     });
   }
 
+  public async withdraw(currency: string, amount: number, address: string) {
+    const withdrawalResult = await this.exchange.withdraw(currency, amount, address)
+    return withdrawalResult;
+  }
+
+  public async createOrder(symbol: string, type: Order['type'], side: Order['side'], amount: number) {
+    const order = await this.exchange.createOrder(symbol, type, side, amount)
+    return order;
+  }
+
+  public async fetchOrder(id: string) {
+    const order = await this.exchange.fetchOrder(id, this.symbol)
+    return order;
+  }
 
   public async getPositions() {
     const positions = await this.exchange.fetchPositions();
@@ -72,7 +113,7 @@ export class GenericExchange {
     });
   }
 
-  public async getBalances() {
+  public async fetchBalance() {
     const balances = await this.exchange.fetchBalance();
     const data = JSON.stringify(balances.info);
     // console.log(`balances: ${data}`);
@@ -119,6 +160,28 @@ export class GenericExchange {
     fs.writeFile(filename, data, function (err) {
       if (err) return console.log(err);
     });
+  }
+
+  public async getNextFundingRate(symbol: string) {
+    if (this.exchangeName === "ftx") {
+      const result = await this.exchange.publicGetFuturesFutureNameStats({ future_name: symbol });
+      return result;
+    } else if (this.exchangeName === "okex" || this.exchangeName === "okex5") {
+      // following method does not exist...
+      const result = await this.exchange.publicGetFuturesFutureNameStats({ future_name: symbol });
+      return result;
+    }
+  }
+
+  public async privateGetAccount() {
+    if (this.exchangeName === "ftx") {
+      const result = await this.exchange.privateGetAccount();
+      return result;
+    } else if (this.exchangeName === "okex" || this.exchangeName === "okex5") {
+      // following method does not exist...
+      const result = await this.exchange.privateGetAccount();
+      return result;
+    }
   }
 
   // Sub-class this to implement exchange specific method
