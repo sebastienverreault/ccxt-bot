@@ -5,9 +5,9 @@ import { GenericExchange, SupportedExchanges, ApiConfig } from "./GenericExchang
 //   OKEX = "okex5",
 // }
 
-const activeExchangeId = SupportedExchanges.OKEX
+const activeExchangeId = SupportedExchanges.OKEXv5
 
-const activeApiConfig = new ApiConfig(undefined, undefined, undefined)
+const activeApiConfig = new ApiConfig(activeExchangeId, undefined, undefined, undefined)
 
 switch (activeExchangeId as SupportedExchanges) {
   case SupportedExchanges.FTX:
@@ -16,7 +16,7 @@ switch (activeExchangeId as SupportedExchanges) {
     activeApiConfig.password = process.env.FTX_PASSWORD
     break
 
-  case SupportedExchanges.OKEX:
+  case SupportedExchanges.OKEXv5:
     activeApiConfig.apiKey = process.env.OKEX_KEY
     activeApiConfig.secret = process.env.OKEX_SECRET
     activeApiConfig.password = process.env.OKEX_PASSWORD
@@ -26,20 +26,28 @@ switch (activeExchangeId as SupportedExchanges) {
     break
 }
 
-const ftxExchangeId = "ftx"
 // const ftxApiKey = process.env.SEB_FTX_KEY;
 // const ftxApiSecret = process.env.SEB_FTX_SECRET;
 // const ftxPassword = process.env.SEB_FTX_PASSWORD;
 const ftxApiKey = process.env.NIC_FTX_KEY
 const ftxApiSecret = process.env.NIC_FTX_SECRET
 const ftxPassword = process.env.NIC_FTX_PASSWORD
-const ftxApiConfig = new ApiConfig(ftxApiKey, ftxApiSecret, ftxPassword)
+const ftxApiConfig = new ApiConfig(
+  SupportedExchanges.FTX,
+  ftxApiKey,
+  ftxApiSecret,
+  ftxPassword,
+)
 
-const okexExchangeId = "okex5"
 const okexApiKey = process.env.OKEX_KEY
 const okexApiSecret = process.env.OKEX_SECRET
 const okexPassword = process.env.OKEX_PASSWORD
-const okexApiConfig = new ApiConfig(okexApiKey, okexApiSecret, okexPassword)
+const okexApiConfig = new ApiConfig(
+  SupportedExchanges.OKEXv5,
+  okexApiKey,
+  okexApiSecret,
+  okexPassword,
+)
 // const okexApiKey = process.env.TRADE_OKEX_KEY;
 // const okexApiSecret = process.env.TRADE_OKEX_SECRET;
 // const okexPassword = process.env.TRADE_OKEX_PASSWORD;
@@ -52,8 +60,8 @@ const okexSymbol = "BTC-USD-211231"
 const okexSwapSymbol = "BTC-USD-SWAP"
 
 async function main() {
-  const ftx = new GenericExchange(ftxExchangeId, ftxApiConfig, ftxSymbol)
-  const okex = new GenericExchange(okexExchangeId, okexApiConfig, okexSymbol)
+  const ftx = new GenericExchange(ftxApiConfig)
+  const okex = new GenericExchange(okexApiConfig)
   // const activeExchange = new GenericExchange(activeExchangeId, activeApiConfig, okexSymbol);
 
   // ftx.getBtcSpot();

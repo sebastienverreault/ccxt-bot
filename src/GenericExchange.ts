@@ -7,35 +7,37 @@ import path from "path"
 const DATE_FORMAT_STRING = "yyyymmdd.HHMMss"
 const TEMP_DIR = "temp-data"
 
+export enum SupportedExchanges {
+  FTX = "ftx",
+  OKEXv3 = "okex",
+  OKEXv5 = "okex5",
+}
+
 export class ApiConfig {
   constructor(
+    public exchangeId: SupportedExchanges | undefined,
     public apiKey: string | undefined,
     public secret: string | undefined,
     public password: string | undefined,
-  ) {}
-}
-
-export enum SupportedExchanges {
-  FTX = "ftx",
-  OKEX = "okex5",
+  ) {
+    this.exchangeId = exchangeId
+  }
 }
 
 export class GenericExchange {
   dateFormatString
   tempDir
-  exchangeName
+  exchangeId: ExchangeId
   exchange
-  symbol
+  defaultSymbol
 
   // public ccxt;
 
-  constructor(exchangeName: string, apiConfig: ApiConfig, symbol: string) {
+  constructor(apiConfig: ApiConfig) {
     this.dateFormatString = DATE_FORMAT_STRING
     this.tempDir = TEMP_DIR
-    this.exchangeName = exchangeName
-    this.symbol = symbol
-    const exchangeId = this.exchangeName as ExchangeId
-    const exchangeClass = ccxt[exchangeId]
+    this.exchangeId = apiConfig.exchangeId as ExchangeId
+    const exchangeClass = ccxt[this.exchangeId]
     this.exchange = new exchangeClass({
       apiKey: apiConfig.apiKey,
       secret: apiConfig.secret,
@@ -47,10 +49,22 @@ export class GenericExchange {
   }
 
   public GetSymbol() {
-    // Should resolve best instrument to used given the exchange and the market conditions.
-    const optimalSymbol = this.symbol
-    this.symbol = optimalSymbol
-    return this.symbol
+    // TODO: Should resolve best instrument to used given the exchange and the market conditions.
+    // const optimalSymbol = this.getOptimalSymbol;
+    // this.defaultSymbol = optimalSymbol;
+
+    const ftxDefaultSymbol = "BTC-PERP"
+    const okexDefaultSymbol = "BTC-USD-211231"
+
+    if (this.exchangeId === SupportedExchanges.FTX) {
+      this.defaultSymbol = ftxDefaultSymbol
+    } else if (this.exchangeId === SupportedExchanges.OKEXv3) {
+      this.defaultSymbol = okexDefaultSymbol
+    } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
+      this.defaultSymbol = okexDefaultSymbol
+    }
+
+    return this.defaultSymbol
   }
 
   public has() {
@@ -91,7 +105,7 @@ export class GenericExchange {
   }
 
   public async fetchOrder(id: string) {
-    const order = await this.exchange.fetchOrder(id, this.symbol)
+    const order = await this.exchange.fetchOrder(id, this.defaultSymbol)
     return order
   }
 
@@ -145,12 +159,17 @@ export class GenericExchange {
   }
 
   public async getNextFundingRate(symbol: string) {
-    if (this.exchangeName === "ftx") {
+    if (this.exchangeId === SupportedExchanges.FTX) {
       const arg = { future_name: symbol }
       const result = await this.exchange.publicGetFuturesFutureNameStats(arg)
       this.writeFile(result, "funding.rate")
       return result
-    } else if (this.exchangeName === "okex" || this.exchangeName === "okex5") {
+    } else if (this.exchangeId === SupportedExchanges.OKEXv3) {
+      const arg = { instId: symbol }
+      const result = await this.exchange.publicGetPublicFundingRate(arg)
+      this.writeFile(result, "funding.rate")
+      return result
+    } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
       const arg = { instId: symbol }
       const result = await this.exchange.publicGetPublicFundingRate(arg)
       this.writeFile(result, "funding.rate")
@@ -159,34 +178,19 @@ export class GenericExchange {
   }
 
   public async privateGetAccount() {
-    if (this.exchangeName === "ftx") {
+    if (this.exchangeId === SupportedExchanges.FTX) {
       const result = await this.exchange.privateGetAccount()
       return result
-    } else if (this.exchangeName === "okex" || this.exchangeName === "okex5") {
+    } else if (this.exchangeId === SupportedExchanges.OKEXv3) {
+      // following method does not exist...
+      const result = await this.exchange.privateGetAccount()
+      return result
+    } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
       // following method does not exist...
       const result = await this.exchange.privateGetAccount()
       return result
     }
   }
-
-  // // Sub-class this to implement exchange specific method
-  // public async getStats() {
-  //   let data = ""
-  //   if (this.exchangeName === "ftx") {
-  //     data = JSON.stringify(
-  //       this.exchange.publicGetFuturesFutureNameStats({
-  //         future_name: this.symbol,
-  //       }),
-  //     )
-  //   } else if (this.exchangeName === "okex" || this.exchangeName === "okex5") {
-  //     data = JSON.stringify(
-  //       this.exchange.publicGetPublicFundingRate({
-  //         future_name: this.symbol,
-  //       }),
-  //     )
-  //   }
-  //   this.writeFileRaw(data, "stats")
-  // }
 
   public async getMethods() {
     const methods = Object.keys(this.exchange)
@@ -205,7 +209,7 @@ export class GenericExchange {
     const datetime = dateFormat(new Date(), this.dateFormatString)
     const filename = path.join(
       this.tempDir,
-      `${this.exchangeName}.${type}.${datetime}.json`,
+      `${this.exchange.name}.${type}.${datetime}.json`,
     )
     fs.writeFile(filename, rawData, function (err) {
       if (err) return console.log(err)
