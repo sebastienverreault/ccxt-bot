@@ -31,7 +31,11 @@ export class GenericExchange {
   exchange
   defaultSymbol
 
-  // public ccxt;
+  static ftxDefaultSymbol = "BTC-PERP"
+  static ftxDefaultswapSymbol = "BTC-PERP"
+  static okexDefaultSymbol = "BTC-USD-211231"
+  static okexDefaultSpotSymbol = "BTC-USDT"
+  static okexDefaultSwapSymbol = "BTC-USD-SWAP"
 
   constructor(apiConfig: ApiConfig) {
     this.dateFormatString = DATE_FORMAT_STRING
@@ -43,7 +47,6 @@ export class GenericExchange {
       secret: apiConfig.secret,
       password: apiConfig.password,
     })
-    // this.ccxt = this.exchange;
     console.log(this.exchange.requiredCredentials)
     this.exchange.checkRequiredCredentials()
   }
@@ -53,15 +56,12 @@ export class GenericExchange {
     // const optimalSymbol = this.getOptimalSymbol;
     // this.defaultSymbol = optimalSymbol;
 
-    const ftxDefaultSymbol = "BTC-PERP"
-    const okexDefaultSymbol = "BTC-USD-211231"
-
     if (this.exchangeId === SupportedExchanges.FTX) {
-      this.defaultSymbol = ftxDefaultSymbol
+      this.defaultSymbol = GenericExchange.ftxDefaultSymbol
     } else if (this.exchangeId === SupportedExchanges.OKEXv3) {
-      this.defaultSymbol = okexDefaultSymbol
+      this.defaultSymbol = GenericExchange.okexDefaultSymbol
     } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
-      this.defaultSymbol = okexDefaultSymbol
+      this.defaultSymbol = GenericExchange.okexDefaultSymbol
     }
 
     return this.defaultSymbol
@@ -180,15 +180,130 @@ export class GenericExchange {
   public async privateGetAccount() {
     if (this.exchangeId === SupportedExchanges.FTX) {
       const result = await this.exchange.privateGetAccount()
+      this.writeFile(result, "account")
       return result
     } else if (this.exchangeId === SupportedExchanges.OKEXv3) {
-      // following method does not exist...
       const result = await this.exchange.privateGetAccount()
+      this.writeFile(result, "account")
       return result
     } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
-      // following method does not exist...
-      const result = await this.exchange.privateGetAccount()
+      const result = await this.getOkexV5AccountInfo()
       return result
+    }
+  }
+
+  private async getOkexV5AccountInfo() {
+    const privateGetAccountBalance = await this.exchange.privateGetAccountBalance()
+    this.writeFile(privateGetAccountBalance, "privateGetAccountBalance")
+    const privateGetAccountBills = await this.exchange.privateGetAccountBills()
+    this.writeFile(privateGetAccountBills, "privateGetAccountBills")
+    const privateGetAccountBillsArchive =
+      await this.exchange.privateGetAccountBillsArchive()
+    this.writeFile(privateGetAccountBillsArchive, "privateGetAccountBillsArchive")
+    const privateGetAccountConfig = await this.exchange.privateGetAccountConfig()
+    this.writeFile(privateGetAccountConfig, "privateGetAccountConfig")
+    const privateGetAccountMaxSizeIsolated = await this.exchange.privateGetAccountMaxSize(
+      {
+        instId: GenericExchange.okexDefaultSymbol,
+        tdMode: "isolated",
+      },
+    )
+    this.writeFile(privateGetAccountMaxSizeIsolated, "privateGetAccountMaxSizeIsolated")
+    // const privateGetAccountMaxSizeCross = await this.exchange.privateGetAccountMaxSize({
+    //   instId: GenericExchange.okexDefaultSymbol,
+    //   tdMode: "cross",
+    // })
+    // this.writeFile(privateGetAccountMaxSizeCross, "privateGetAccountMaxSizeCross")
+    // const privateGetAccountMaxSizeCash = await this.exchange.privateGetAccountMaxSize({
+    //   instId: GenericExchange.okexDefaultSymbol,
+    //   tdMode: "cash",
+    // })
+    // this.writeFile(privateGetAccountMaxSizeCash, "privateGetAccountMaxSizeCash")
+    const privateGetAccountMaxAvailSizeIsolated =
+      await this.exchange.privateGetAccountMaxAvailSize({
+        instId: GenericExchange.okexDefaultSymbol,
+        tdMode: "isolated",
+      })
+    this.writeFile(
+      privateGetAccountMaxAvailSizeIsolated,
+      "privateGetAccountMaxAvailSizeIsolated",
+    )
+    const privateGetAccountMaxLoan = await this.exchange.privateGetAccountMaxLoan({
+      instId: GenericExchange.okexDefaultSpotSymbol,
+      mgnMode: "isolated",
+    })
+    this.writeFile(privateGetAccountMaxLoan, "privateGetAccountMaxLoan")
+    const privateGetAccountMaxWithdrawal =
+      await this.exchange.privateGetAccountMaxWithdrawal()
+    this.writeFile(privateGetAccountMaxWithdrawal, "privateGetAccountMaxWithdrawal")
+    const privateGetAccountInterestAccrued =
+      await this.exchange.privateGetAccountInterestAccrued()
+    this.writeFile(privateGetAccountInterestAccrued, "privateGetAccountInterestAccrued")
+    const privateGetAccountInterestRate =
+      await this.exchange.privateGetAccountInterestRate()
+    this.writeFile(privateGetAccountInterestRate, "privateGetAccountInterestRate")
+    const privateGetAccountLeverageInfoIsolated =
+      await this.exchange.privateGetAccountLeverageInfo({
+        instId: GenericExchange.okexDefaultSpotSymbol,
+        mgnMode: "isolated",
+      })
+    this.writeFile(
+      privateGetAccountLeverageInfoIsolated,
+      "privateGetAccountLeverageInfoIsolated",
+    )
+    const privateGetAccountPositions = await this.exchange.privateGetAccountPositions()
+    this.writeFile(privateGetAccountPositions, "privateGetAccountPositions")
+    const privateGetAccountAccountPositionRisk =
+      await this.exchange.privateGetAccountAccountPositionRisk()
+    this.writeFile(
+      privateGetAccountAccountPositionRisk,
+      "privateGetAccountAccountPositionRisk",
+    )
+    const privateGetAccountTradeFeeSpot = await this.exchange.privateGetAccountTradeFee({
+      instType: "SPOT",
+      // instId: GenericExchange.okexDefaultSpotSymbol,
+      category: 1,
+    })
+    this.writeFile(privateGetAccountTradeFeeSpot, "privateGetAccountTradeFeeSpot")
+    const privateGetAccountTradeFeeMargin = await this.exchange.privateGetAccountTradeFee(
+      {
+        instType: "MARGIN",
+        category: 1,
+      },
+    )
+    this.writeFile(privateGetAccountTradeFeeMargin, "privateGetAccountTradeFeeMargin")
+    const privateGetAccountTradeFeeSwap = await this.exchange.privateGetAccountTradeFee({
+      instType: "SWAP",
+      category: 1,
+    })
+    this.writeFile(privateGetAccountTradeFeeSwap, "privateGetAccountTradeFeeSwap")
+    const privateGetAccountTradeFeeFutures =
+      await this.exchange.privateGetAccountTradeFee({
+        instType: "FUTURES",
+        category: 1,
+      })
+    this.writeFile(privateGetAccountTradeFeeFutures, "privateGetAccountTradeFeeFutures")
+
+    return {
+      privateGetAccountBalance,
+      privateGetAccountBills,
+      privateGetAccountBillsArchive,
+      privateGetAccountConfig,
+      // privateGetAccountMaxSizeCash,
+      // privateGetAccountMaxSizeCross,
+      privateGetAccountMaxSizeIsolated,
+      privateGetAccountMaxAvailSizeIsolated,
+      privateGetAccountMaxLoan,
+      privateGetAccountMaxWithdrawal,
+      privateGetAccountInterestAccrued,
+      privateGetAccountInterestRate,
+      privateGetAccountLeverageInfoIsolated,
+      privateGetAccountPositions,
+      privateGetAccountAccountPositionRisk,
+      privateGetAccountTradeFeeSpot,
+      privateGetAccountTradeFeeMargin,
+      privateGetAccountTradeFeeSwap,
+      privateGetAccountTradeFeeFutures,
     }
   }
 

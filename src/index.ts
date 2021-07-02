@@ -1,14 +1,7 @@
 import { GenericExchange, SupportedExchanges, ApiConfig } from "./GenericExchange"
 
-// enum Exchanges {
-//   FTX = "ftx",
-//   OKEX = "okex5",
-// }
-
 const activeExchangeId = SupportedExchanges.OKEXv5
-
 const activeApiConfig = new ApiConfig(activeExchangeId, undefined, undefined, undefined)
-
 switch (activeExchangeId as SupportedExchanges) {
   case SupportedExchanges.FTX:
     activeApiConfig.apiKey = process.env.FTX_KEY
@@ -60,65 +53,101 @@ const okexSymbol = "BTC-USD-211231"
 const okexSwapSymbol = "BTC-USD-SWAP"
 
 async function main() {
-  const ftx = new GenericExchange(ftxApiConfig)
-  const okex = new GenericExchange(okexApiConfig)
-  // const activeExchange = new GenericExchange(activeExchangeId, activeApiConfig, okexSymbol);
-
-  // ftx.getBtcSpot();
-  // okex.getBtcSpot();
-
-  // ftx.getBtcFutures();
-  // okex.getBtcFutures();
-
-  // ftx.getMethods();
-  // okex.getMethods();
-
-  // const ftxStats = await ftx.getStats()
-  // const okexStats = await okex.getStats()
-  // okex3.getStats();
-
-  //   ftx.getMarkets();
-  //   okex.getMarkets();
-
-  // const ftxFundingRate = await ftx.getNextFundingRate(ftxSymbol)
-  // console.log(`NextFundingrate = ${JSON.stringify(ftxFundingRate)}`)
-  // console.log(
-  //   `NextFundingrate.nextFundingRate = ${ftxFundingRate.result.nextFundingRate}`,
-  // )
-
   try {
-    const okexFundingRate = await okex.getNextFundingRate(okexSwapSymbol)
-    console.log(`NextFundingrate = ${JSON.stringify(okexFundingRate)}`)
-    console.log(
-      `NextFundingrate.nextFundingRate = ${okexFundingRate.data[0].nextFundingRate}`,
-    )
+    const ftx = new GenericExchange(ftxApiConfig)
+    const okex = new GenericExchange(okexApiConfig)
+    // const activeExchange = new GenericExchange(activeExchangeId, activeApiConfig, okexSymbol);
+
+    // ftx.getBtcSpot();
+    // okex.getBtcSpot();
+
+    // ftx.getBtcFutures();
+    // okex.getBtcFutures();
+
+    // ftx.getMethods();
+    // okex.getMethods();
+
+    // const ftxStats = await ftx.getStats()
+    // const okexStats = await okex.getStats()
+    // okex3.getStats();
+
+    //   ftx.getMarkets();
+    //   okex.getMarkets();
+
+    //////////////////////////////////
+
+    //
+    // has()
+    //
+    // ftx.has();
+    // okex.has();
+    // okex3.has();
+
+    //
+    // fetchDepositAddress("BTC")
+    //
+    // ftx.fetchDepositAddress("BTC");
+    // okex.fetchDepositAddress("BTC");
+
+    //
+    // fetchBalance()
+    //
+    // const ftxBal = await ftx.fetchBalance();
+    // console.log(`balance.total.BTC = ${ftxBal.total.BTC}`)
+    // console.log(`balance.total.USD = ${ftxBal.total.USD}`)
+    // const okexBal = await okex.fetchBalance();
+    // console.log(`balance.total.BTC = ${okexBal.total.BTC}`)
+    // console.log(`balance.total.USDT = ${okexBal.total.USDT}`)
+
+    //
+    // getNextFundingRate(this.symbol)
+    //
+    // const ftxFundingRate = await ftx.getNextFundingRate(ftxSymbol)
+    // console.log(`NextFundingrate = ${JSON.stringify(ftxFundingRate)}`)
+    // console.log(
+    //   `NextFundingrate.nextFundingRate = ${ftxFundingRate.result.nextFundingRate}`,
+    // )
+    // const okexFundingRate = await okex.getNextFundingRate(okexSwapSymbol)
+    // console.log(`NextFundingrate = ${JSON.stringify(okexFundingRate)}`)
+    // console.log(
+    //   `NextFundingrate.nextFundingRate = ${okexFundingRate.data[0].nextFundingRate}`,
+    // )
+
+    //
+    // privateGetAccount()
+    //
+    // const ftxAccount = await ftx.privateGetAccount()
+    // console.log(JSON.stringify(ftxAccount))
+    const okexAccount = await okex.privateGetAccount()
+    console.log(JSON.stringify(okexAccount))
+
+    //
+    // name()
+    //
+    // console.log(activeExchange.name());
+    // console.log(ftx.name());
+    // console.log(okex.name());
+
+    //
+    // withdraw(currency, btcAmount, address)
+    //
+
+    //
+    // createOrder(this.symbol, orderType, buyOrSell,
+    //
+
+    //
+    // fetchOrder(order.id)
+    //
+
+    // ftx.getPositions();
+    // okex.getPositions();
+
+    // console.log(ftx.has2());
+    // console.log(okex.has2());
   } catch (error) {
     console.log(error)
   }
-
-  // const ftxBal = await ftx.fetchBalance();
-  // console.log(`balance.total.BTC = ${ftxBal.total.BTC}`)
-  // console.log(`balance.total.USD = ${ftxBal.total.USD}`)
-  // const okexBal = await okex.fetchBalance();
-  // console.log(`balance.total.BTC = ${okexBal.total.BTC}`)
-  // console.log(`balance.total.USDT = ${okexBal.total.USDT}`)
-
-  // ftx.getPositions();
-  // okex.getPositions();
-
-  // ftx.has();
-  // okex.has();
-  // okex3.has();
-
-  // ftx.fetchDepositAddress("BTC");
-  // okex.fetchDepositAddress("BTC");
-
-  // console.log(activeExchange.name());
-  // console.log(ftx.name());
-  // console.log(okex.name());
-
-  // console.log(ftx.has2());
-  // console.log(okex.has2());
 }
 
 main()
