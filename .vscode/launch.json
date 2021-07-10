@@ -6,15 +6,19 @@
     "configurations": [
 
         {
-            "type": "node",
+            "type": "pwa-node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Debug index.js",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/lib/index.js",
-            "envFile": "${workspaceFolder}/.envrc",
+            // "program": "${workspaceFolder}/src/index.ts",
             // "preLaunchTask": "tsc: build - tsconfig.json",
+            // "preLaunchTask": "npx tsc -p tsconfig-build.json --skipLibCheck",
+            "preLaunchTask": "npm: build",
+            "envFile": "${workspaceFolder}/.envrc_debug",
+            "program": "${workspaceFolder}/lib/index.js",
+            "console": "integratedTerminal",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]

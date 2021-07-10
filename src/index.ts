@@ -25,6 +25,9 @@ switch (activeExchangeId as SupportedExchanges) {
 const ftxApiKey = process.env.NIC_FTX_KEY
 const ftxApiSecret = process.env.NIC_FTX_SECRET
 const ftxPassword = process.env.NIC_FTX_PASSWORD
+// const ftxApiKey = process.env.NIC_TRADE_FTX_KEY
+// const ftxApiSecret = process.env.NIC_TRADE_FTX_SECRET
+// const ftxPassword = process.env.NIC_TRADE_FTX_PASSWORD
 const ftxApiConfig = new ApiConfig(
   SupportedExchanges.FTX,
   ftxApiKey,
@@ -92,10 +95,10 @@ async function main() {
     //
     // fetchBalance()
     //
-    // const ftxBal = await ftx.fetchBalance();
+    // const ftxBal = await ftx.fetchBalance()
     // console.log(`balance.total.BTC = ${ftxBal.total.BTC}`)
     // console.log(`balance.total.USD = ${ftxBal.total.USD}`)
-    // const okexBal = await okex.fetchBalance();
+    // const okexBal = await okex.fetchBalance()
     // console.log(`balance.total.BTC = ${okexBal.total.BTC}`)
     // console.log(`balance.total.USDT = ${okexBal.total.USDT}`)
 
@@ -118,8 +121,8 @@ async function main() {
     //
     // const ftxAccount = await ftx.privateGetAccount()
     // console.log(JSON.stringify(ftxAccount))
-    const okexAccount = await okex.privateGetAccount()
-    console.log(JSON.stringify(okexAccount))
+    // const okexAccount = await okex.privateGetAccount()
+    // console.log(JSON.stringify(okexAccount))
 
     //
     // name()
@@ -140,8 +143,22 @@ async function main() {
     // fetchOrder(order.id)
     //
 
-    // ftx.getPositions();
-    // okex.getPositions();
+    // await ftx.getPositions()
+    // await okex.getPositions()
+
+    // let since = exchange.milliseconds () - 86400000 // -1 day from now
+    // alternatively, fetch from a certain starting datetime
+    // let since = exchange.parse8601 ('2018-01-01T00:00:00Z')
+    const since = ftx.exchange.parse8601("2018-01-01T00:00:00Z")
+
+    // await ftx.fetchMyTrades(since)
+    await okex.fetchMyTrades(since)
+
+    // await ftx.fetchDeposits(since)
+    // await okex.fetchDeposits(since)
+
+    // await ftx.fetchWithdrawals(since)
+    // await okex.fetchWithdrawals(since)
 
     // console.log(ftx.has2());
     // console.log(okex.has2());

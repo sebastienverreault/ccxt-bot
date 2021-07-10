@@ -32,9 +32,11 @@ export class GenericExchange {
   defaultSymbol
 
   static ftxDefaultSymbol = "BTC-PERP"
-  static ftxDefaultswapSymbol = "BTC-PERP"
+  static ftxDefaultSpotSymbol = "BTC/USD"
+  static ftxDefaultSwapSymbol = "BTC-PERP"
+  static okexOldSymbol = "BTC-USD-210702"
   static okexDefaultSymbol = "BTC-USD-211231"
-  static okexDefaultSpotSymbol = "BTC-USDT"
+  static okexDefaultSpotSymbol = "BTC/USDT"
   static okexDefaultSwapSymbol = "BTC-USD-SWAP"
 
   constructor(apiConfig: ApiConfig) {
@@ -121,6 +123,317 @@ export class GenericExchange {
     return balances
   }
 
+  public async fetchMyTrades_old() {
+    if (this.exchangeId === SupportedExchanges.FTX) {
+      let symbol = GenericExchange.ftxDefaultSwapSymbol
+      let myTrades = await this.exchange.fetchMyTrades(symbol)
+      this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+
+      symbol = GenericExchange.ftxDefaultSpotSymbol
+      myTrades = await this.exchange.fetchMyTrades(symbol)
+      this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+
+      return myTrades
+    } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
+      try {
+        const symbol = GenericExchange.okexOldSymbol
+        const myTrades = await this.exchange.fetchMyTrades(symbol)
+        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+      } catch (error) {
+        console.log(`Error in fetchMyTrades(${GenericExchange.okexOldSymbol})`, error)
+      }
+
+      try {
+        const symbol = GenericExchange.okexDefaultSymbol
+        const myTrades = await this.exchange.fetchMyTrades(symbol)
+        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+      } catch (error) {
+        console.log(`Error in fetchMyTrades(${GenericExchange.okexDefaultSymbol})`, error)
+      }
+
+      try {
+        const symbol = GenericExchange.okexDefaultSpotSymbol
+        const myTrades = await this.exchange.fetchMyTrades(symbol)
+        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+      } catch (error) {
+        console.log(
+          `Error in fetchMyTrades(${GenericExchange.okexDefaultSpotSymbol})`,
+          error,
+        )
+      }
+    }
+  }
+
+  public async fetchMyTrades_old2() {
+    if (this.exchangeId === SupportedExchanges.FTX) {
+      let symbol = GenericExchange.ftxDefaultSwapSymbol
+      let myTrades = await this.fetchMyTradesAllPages(symbol)
+      this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+
+      symbol = GenericExchange.ftxDefaultSpotSymbol
+      myTrades = await this.fetchMyTradesAllPages(symbol)
+      this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+
+      return myTrades
+    } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
+      try {
+        const symbol = GenericExchange.okexOldSymbol
+        const myTrades = await this.fetchMyTradesAllPages(symbol)
+        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+      } catch (error) {
+        console.log(`Error in fetchMyTrades(${GenericExchange.okexOldSymbol})`, error)
+      }
+
+      try {
+        const symbol = GenericExchange.okexDefaultSymbol
+        const myTrades = await this.fetchMyTradesAllPages(symbol)
+        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+      } catch (error) {
+        console.log(`Error in fetchMyTrades(${GenericExchange.okexDefaultSymbol})`, error)
+      }
+
+      try {
+        const symbol = GenericExchange.okexDefaultSpotSymbol
+        const myTrades = await this.fetchMyTradesAllPages(symbol)
+        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+      } catch (error) {
+        console.log(
+          `Error in fetchMyTrades(${GenericExchange.okexDefaultSpotSymbol})`,
+          error,
+        )
+      }
+    }
+  }
+
+  public async fetchMyTrades(since) {
+    if (this.exchangeId === SupportedExchanges.FTX) {
+      let symbol = GenericExchange.ftxDefaultSwapSymbol
+      let myTrades = await this.fetchMyTradesSince(symbol, since)
+      this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+
+      symbol = GenericExchange.ftxDefaultSpotSymbol
+      myTrades = await this.fetchMyTradesSince(symbol, since)
+      this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+
+      return myTrades
+    } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
+      try {
+        const symbol = GenericExchange.okexOldSymbol
+        const myTrades = await this.fetchMyTradesSince(symbol, since)
+        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+      } catch (error) {
+        console.log(`Error in fetchMyTrades(${GenericExchange.okexOldSymbol})`, error)
+      }
+
+      try {
+        const symbol = GenericExchange.okexDefaultSymbol
+        const myTrades = await this.fetchMyTradesSince(symbol, since)
+        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+      } catch (error) {
+        console.log(`Error in fetchMyTrades(${GenericExchange.okexDefaultSymbol})`, error)
+      }
+
+      try {
+        const symbol = GenericExchange.okexDefaultSpotSymbol
+        const myTrades = await this.fetchMyTradesSince(symbol, since)
+        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+      } catch (error) {
+        console.log(
+          `Error in fetchMyTrades(${GenericExchange.okexDefaultSpotSymbol})`,
+          error,
+        )
+      }
+    }
+  }
+
+  // fetchDeposits
+  public async fetchDeposits(since) {
+    // const deposits = await this.exchange.fetchDeposits()
+    const deposits = await this.fetchDepositsSince(since)
+    this.writeFile(deposits, "deposits")
+    return deposits
+  }
+
+  // fetchWithdrawals
+  public async fetchWithdrawals(since) {
+    // const withdrawals = await this.exchange.fetchWithdrawals()
+    const withdrawals = await this.fetchWithdrawalsSince(since)
+    this.writeFile(withdrawals, "withdrawals")
+    return withdrawals
+  }
+
+  private async fetchTradesAllPages(symbol) {
+    let page = 0 // exchange-specific type and value
+    const allTrades: any[] = []
+    const one = true
+    while (one) {
+      const since = undefined
+      const limit = 100
+      const params = {
+        page: page, // exchange-specific non-unified parameter name
+      }
+      const trades = await this.exchange.fetchTrades(symbol, since, limit, params)
+      if (trades.length) {
+        // not thread-safu and exchange-specific !
+        page = this.exchange.last_json_response["cursor"]
+        console.log(`Got fetchTrades() page=${page}`)
+        allTrades.push(trades)
+        if (!page) {
+          break
+        }
+      } else {
+        break
+      }
+    }
+    return allTrades
+  }
+
+  private async fetchTradesSince(symbol, msSince) {
+    let since = msSince
+    let allTrades = []
+    while (since < this.exchange.milliseconds()) {
+      const limit = 100
+      const trades = await this.exchange.fetchTrades(symbol, since, limit)
+      if (trades.length) {
+        since = trades[trades.length - 1]["timestamp"] + 1
+        allTrades = allTrades.concat(trades)
+      } else {
+        break
+      }
+    }
+    return allTrades
+  }
+
+  private async fetchMyTradesAllPages(symbol) {
+    let page = 0 // exchange-specific type and value
+    const allMyTrades: any[] = []
+    const one = true
+    while (one) {
+      const since = undefined
+      const limit = 100
+      const params = {
+        page: page, // exchange-specific non-unified parameter name
+      }
+      const trades = await this.exchange.fetchMyTrades(symbol, since, limit, params)
+      if (trades.length) {
+        // not thread-safu and exchange-specific !
+        page = this.exchange.last_json_response["cursor"]
+        console.log(`Got fetchMyTrades() page=${page}`)
+        allMyTrades.push(trades)
+        if (!page) {
+          break
+        }
+      } else {
+        break
+      }
+    }
+    return allMyTrades
+  }
+
+  private async fetchMyTradesSince(symbol, msSince) {
+    let since = msSince
+    let allMyTrades = []
+    while (since < this.exchange.milliseconds()) {
+      const limit = 100
+      const trades = await this.exchange.fetchMyTrades(symbol, since, limit)
+      if (trades.length) {
+        since = trades[trades.length - 1]["timestamp"] + 1
+        allMyTrades = allMyTrades.concat(trades)
+      } else {
+        break
+      }
+    }
+    return allMyTrades
+  }
+
+  private async fetchDepositsAllPages() {
+    let page = 0 // exchange-specific type and value
+    const allDeposits: any[] = []
+    const one = true
+    while (one) {
+      const code = undefined
+      const since = undefined
+      const limit = 100
+      const params = {
+        page: page, // exchange-specific non-unified parameter name
+      }
+      const trades = await this.exchange.fetchDeposits(code, since, limit, params)
+      if (trades.length) {
+        // not thread-safu and exchange-specific !
+        page = this.exchange.last_json_response["cursor"]
+        console.log(`Got fetchDeposits() page=${page}`)
+        allDeposits.push(trades)
+        if (!page) {
+          break
+        }
+      } else {
+        break
+      }
+    }
+    return allDeposits
+  }
+
+  private async fetchDepositsSince(msSince) {
+    let since = msSince
+    let allDeposits = []
+    while (since < this.exchange.milliseconds()) {
+      const code = undefined
+      const limit = 100
+      const trades = await this.exchange.fetchDeposits(code, since, limit)
+      if (trades.length) {
+        since = trades[trades.length - 1]["timestamp"] + 1
+        allDeposits = allDeposits.concat(trades)
+      } else {
+        break
+      }
+    }
+    return allDeposits
+  }
+
+  private async fetchWithdrawalsAllPages() {
+    let page = 0 // exchange-specific type and value
+    const allWithdrawals: any[] = []
+    const one = true
+    while (one) {
+      const code = undefined
+      const since = undefined
+      const limit = 100
+      const params = {
+        page: page, // exchange-specific non-unified parameter name
+      }
+      const trades = await this.exchange.fetchWithdrawals(code, since, limit, params)
+      if (trades.length) {
+        // not thread-safu and exchange-specific !
+        page = this.exchange.last_json_response["cursor"]
+        console.log(`Got fetchWithdrawals() page=${page}`)
+        allWithdrawals.push(trades)
+        if (!page) {
+          break
+        }
+      } else {
+        break
+      }
+    }
+    return allWithdrawals
+  }
+
+  private async fetchWithdrawalsSince(msSince) {
+    let since = msSince
+    let allWithdrawals = []
+    while (since < this.exchange.milliseconds()) {
+      const code = undefined
+      const limit = 100
+      const trades = await this.exchange.fetchWithdrawals(code, since, limit)
+      if (trades.length) {
+        since = trades[trades.length - 1]["timestamp"] + 1
+        allWithdrawals = allWithdrawals.concat(trades)
+      } else {
+        break
+      }
+    }
+    return allWithdrawals
+  }
+
   public async getBtcSpot() {
     const instrument = await this.getInstrument("BTC", "spot")
     return instrument
@@ -177,7 +490,47 @@ export class GenericExchange {
     }
   }
 
+  /**
+   *
+   * API Ref: https://docs.ftx.com/#account
+   *
+   * ftx.collateral 	      number 	  3568181.02691129 	    "amount of collateral"
+   * ftx.positions 	        array 		                      See Get positions for details
+   * ftx.marginFraction 	  number 	  0.5588433331419503 -  ratio between total account value and total account position notional.
+   * ftx.totalAccountValue 	number 	  3568180.98341129 	    total value of the account, using mark price for positions
+   * ftx.chargeInterestOnNegativeUsd
+   *
+   * for ref.
+   * ftx.totalPositionSize 	number 	  6384939.6992 	        total size of positions held by the account, using mark price
+   *
+   * for calc.
+   * ftx.marginFraction     = ftx.totalAccountValue / ftx.totalPositionSize
+   * 0.5588433331419503     = 3568180.98341129      / 6384939.6992          == 0.5588433331419503
+   *
+   *
+   * API Ref: https://www.okex.com/docs-v5/en/#rest-api-account-get-account-and-position-risk
+   *
+   * ftx.collateral 	      === mgnRatio?
+   * ftx.positions 	        === okex.posData 	Array 	Detailed position information in all currencies
+   * ftx.marginFraction 	  ===
+   * ftx.totalAccountValue 	===
+   * ftx.chargeInterestOnNegativeUsd
+   *
+   *
+   * API Ref: https://www.okex.com/docs-v5/en/#rest-api-account-get-balance
+   *
+   * ftx.collateral 	      === mgnRatio?
+   *
+   *
+   */
   public async privateGetAccount() {
+    /* Needs 
+        ftx.collateral,
+        ftx.positions,
+        ftx.chargeInterestOnNegativeUsd,
+        ftx.marginFraction,
+        ftx.totalAccountValue,
+    */
     if (this.exchangeId === SupportedExchanges.FTX) {
       const result = await this.exchange.privateGetAccount()
       this.writeFile(result, "account")

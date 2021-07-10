@@ -36,6 +36,7 @@ lib
 artifacts
 
 .env
-.envrc
+.envrc*
 
 temp-data
+bak
