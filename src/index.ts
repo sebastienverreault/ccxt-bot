@@ -67,8 +67,8 @@ async function main() {
     // ftx.getBtcFutures();
     // okex.getBtcFutures();
 
-    // ftx.getMethods();
-    // okex.getMethods();
+    // ftx.getMethods()
+    // okex.getMethods()
 
     // const ftxStats = await ftx.getStats()
     // const okexStats = await okex.getStats()
@@ -82,15 +82,20 @@ async function main() {
     //
     // has()
     //
-    // ftx.has();
-    // okex.has();
+    // ftx.has()
+    // okex.has()
     // okex3.has();
 
     //
     // fetchDepositAddress("BTC")
     //
-    // ftx.fetchDepositAddress("BTC");
-    // okex.fetchDepositAddress("BTC");
+    ftx.fetchDepositAddress("BTC")
+    okex.fetchDepositAddress("BTC")
+    // okex.fetchDepositAddress("BTC-Bitcoin")
+    // okex.fetchDepositAddress("BTC-Lightning")
+
+    // ftx.fetchCurrencies()
+    // okex.fetchCurrencies()
 
     //
     // fetchBalance()
@@ -149,16 +154,22 @@ async function main() {
     // let since = exchange.milliseconds () - 86400000 // -1 day from now
     // alternatively, fetch from a certain starting datetime
     // let since = exchange.parse8601 ('2018-01-01T00:00:00Z')
-    const since = ftx.exchange.parse8601("2018-01-01T00:00:00Z")
+    // const ftxSince = ftx.exchange.parse8601("2018-01-01T00:00:00Z")
+    // const okexSince = okex.exchange.parse8601("2018-01-01T00:00:00Z")
 
-    // await ftx.fetchMyTrades(since)
-    await okex.fetchMyTrades(since)
+    // Our trades on our account
+    // await ftx.fetchMyTrades(ftxSince)
+    // await okex.fetchMyTrades(okexSince)
 
-    // await ftx.fetchDeposits(since)
-    // await okex.fetchDeposits(since)
+    // just trades that happened, not ours...
+    // await ftx.fetchTrades(ftxSince)
+    // await okex.fetchTrades(okexSince)
 
-    // await ftx.fetchWithdrawals(since)
-    // await okex.fetchWithdrawals(since)
+    // await ftx.fetchDeposits(ftxSince)
+    // await okex.fetchDeposits(okexSince)
+
+    // await ftx.fetchWithdrawals(ftxSince)
+    // await okex.fetchWithdrawals(okexSince)
 
     // console.log(ftx.has2());
     // console.log(okex.has2());

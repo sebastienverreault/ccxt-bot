@@ -14,17 +14,18 @@
   "dependencies": {
     "@types/dateformat": "^3.0.1",
     "ccxt": "^1.52.27",
-    "dateformat": "^4.5.1"
+    "dateformat": "^4.5.1",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@jest/test-sequencer": "^27.0.5",
+    "@types/jest": "^26.0.23",
+    "@types/node": "^15.12.4",
     "@typescript-eslint/eslint-plugin": "^4.27.0",
     "@typescript-eslint/parser": "^4.27.0",
     "eslint": "^7.28.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.23.4",
-    "@jest/test-sequencer": "^27.0.5",
-    "@types/jest": "^26.0.23",
-    "@types/node": "^15.12.4",
     "jest": "^27.0.5",
     "jest-junit": "^12.2.0",
     "ts-jest": "^27.0.3",

@@ -1,3 +1,4 @@
+import _ from "lodash"
 import ccxt, { ExchangeId, Order } from "ccxt"
 import { sleep } from "./utils"
 import fs from "fs"
@@ -86,9 +87,36 @@ export class GenericExchange {
   }
 
   async fetchDepositAddress(currency: string) {
-    const address = await this.exchange.fetchDepositAddress(currency)
-    this.writeFile(address, "deposit.address")
-    return address
+    if (this.exchangeId === SupportedExchanges.FTX) {
+      const address = await this.exchange.fetchDepositAddress(currency)
+      this.writeFile(address, "deposit.address")
+      return address
+    } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
+      const addresses = await this.exchange.privateGetAssetDepositAddress({
+        ccy: currency,
+      })
+      this.writeFile(addresses, "deposit.address")
+      const btcAddress = _.find(addresses.data, (address) => {
+        return address.chain === "BTC-Bitcoin"
+      })
+      const lnAddress = _.find(addresses.data, (address) => {
+        return address.chain === "BTC-Lightning"
+      })
+      const ret = { btcAddress: btcAddress, lnAddress: lnAddress }
+      return ret
+    }
+  }
+
+  async fetchCurrencies() {
+    if (this.exchangeId === SupportedExchanges.FTX) {
+      const currencies = await this.exchange.fetchCurrencies()
+      this.writeFile(currencies, "currencies")
+      return currencies
+    } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
+      const currencies = await this.exchange.privateGetAssetCurrencies()
+      this.writeFile(currencies, "currencies")
+      return currencies
+    }
   }
 
   public async withdraw(currency: string, amount: number, address: string) {
@@ -123,82 +151,31 @@ export class GenericExchange {
     return balances
   }
 
-  public async fetchMyTrades_old() {
+  public async fetchTrades(since) {
     if (this.exchangeId === SupportedExchanges.FTX) {
       let symbol = GenericExchange.ftxDefaultSwapSymbol
-      let myTrades = await this.exchange.fetchMyTrades(symbol)
-      this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+      let trades = await this.fetchTradesSince(symbol, since)
+      this.writeFile(trades, `trades-${symbol.replace("/", "-")}`)
 
       symbol = GenericExchange.ftxDefaultSpotSymbol
-      myTrades = await this.exchange.fetchMyTrades(symbol)
-      this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
-
-      return myTrades
+      trades = await this.fetchTradesSince(symbol, since)
+      this.writeFile(trades, `trades-${symbol.replace("/", "-")}`)
     } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
       try {
-        const symbol = GenericExchange.okexOldSymbol
-        const myTrades = await this.exchange.fetchMyTrades(symbol)
-        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
-      } catch (error) {
-        console.log(`Error in fetchMyTrades(${GenericExchange.okexOldSymbol})`, error)
-      }
-
-      try {
         const symbol = GenericExchange.okexDefaultSymbol
-        const myTrades = await this.exchange.fetchMyTrades(symbol)
-        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+        const trades = await this.fetchTradesSince(symbol, since)
+        this.writeFile(trades, `trades-${symbol.replace("/", "-")}`)
       } catch (error) {
-        console.log(`Error in fetchMyTrades(${GenericExchange.okexDefaultSymbol})`, error)
+        console.log(`Error in fetchTrades(${GenericExchange.okexDefaultSymbol})`, error)
       }
 
       try {
         const symbol = GenericExchange.okexDefaultSpotSymbol
-        const myTrades = await this.exchange.fetchMyTrades(symbol)
-        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+        const trades = await this.fetchTradesSince(symbol, since)
+        this.writeFile(trades, `trades-${symbol.replace("/", "-")}`)
       } catch (error) {
         console.log(
-          `Error in fetchMyTrades(${GenericExchange.okexDefaultSpotSymbol})`,
-          error,
-        )
-      }
-    }
-  }
-
-  public async fetchMyTrades_old2() {
-    if (this.exchangeId === SupportedExchanges.FTX) {
-      let symbol = GenericExchange.ftxDefaultSwapSymbol
-      let myTrades = await this.fetchMyTradesAllPages(symbol)
-      this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
-
-      symbol = GenericExchange.ftxDefaultSpotSymbol
-      myTrades = await this.fetchMyTradesAllPages(symbol)
-      this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
-
-      return myTrades
-    } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
-      try {
-        const symbol = GenericExchange.okexOldSymbol
-        const myTrades = await this.fetchMyTradesAllPages(symbol)
-        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
-      } catch (error) {
-        console.log(`Error in fetchMyTrades(${GenericExchange.okexOldSymbol})`, error)
-      }
-
-      try {
-        const symbol = GenericExchange.okexDefaultSymbol
-        const myTrades = await this.fetchMyTradesAllPages(symbol)
-        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
-      } catch (error) {
-        console.log(`Error in fetchMyTrades(${GenericExchange.okexDefaultSymbol})`, error)
-      }
-
-      try {
-        const symbol = GenericExchange.okexDefaultSpotSymbol
-        const myTrades = await this.fetchMyTradesAllPages(symbol)
-        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
-      } catch (error) {
-        console.log(
-          `Error in fetchMyTrades(${GenericExchange.okexDefaultSpotSymbol})`,
+          `Error in fetchtrades(${GenericExchange.okexDefaultSpotSymbol})`,
           error,
         )
       }
@@ -207,56 +184,41 @@ export class GenericExchange {
 
   public async fetchMyTrades(since) {
     if (this.exchangeId === SupportedExchanges.FTX) {
-      let symbol = GenericExchange.ftxDefaultSwapSymbol
-      let myTrades = await this.fetchMyTradesSince(symbol, since)
-      this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
-
-      symbol = GenericExchange.ftxDefaultSpotSymbol
-      myTrades = await this.fetchMyTradesSince(symbol, since)
-      this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
-
-      return myTrades
+      try {
+        const symbol = "all"
+        const myTrades = await this.fetchMyTradesSince(undefined, since)
+        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
+      } catch (error) {
+        console.log(`Error in fetchMyTrades("all")`, error)
+      }
     } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
       try {
-        const symbol = GenericExchange.okexOldSymbol
-        const myTrades = await this.fetchMyTradesSince(symbol, since)
+        const symbol = "all"
+        const myTrades = await this.fetchMyTradesSince(undefined, since)
         this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
       } catch (error) {
-        console.log(`Error in fetchMyTrades(${GenericExchange.okexOldSymbol})`, error)
-      }
-
-      try {
-        const symbol = GenericExchange.okexDefaultSymbol
-        const myTrades = await this.fetchMyTradesSince(symbol, since)
-        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
-      } catch (error) {
-        console.log(`Error in fetchMyTrades(${GenericExchange.okexDefaultSymbol})`, error)
-      }
-
-      try {
-        const symbol = GenericExchange.okexDefaultSpotSymbol
-        const myTrades = await this.fetchMyTradesSince(symbol, since)
-        this.writeFile(myTrades, `myTrades-${symbol.replace("/", "-")}`)
-      } catch (error) {
-        console.log(
-          `Error in fetchMyTrades(${GenericExchange.okexDefaultSpotSymbol})`,
-          error,
-        )
+        console.log(`Error in fetchMyTrades("all")`, error)
       }
     }
   }
 
   // fetchDeposits
   public async fetchDeposits(since) {
-    // const deposits = await this.exchange.fetchDeposits()
-    const deposits = await this.fetchDepositsSince(since)
-    this.writeFile(deposits, "deposits")
-    return deposits
+    if (this.exchangeId === SupportedExchanges.FTX) {
+      const deposits = await this.fetchDepositsSince(since)
+      this.writeFile(deposits, "deposits")
+      return deposits
+    } else if (this.exchangeId === SupportedExchanges.OKEXv5) {
+      // somehow since does not return data on this exchange.
+      // const deposits = await this.fetchDepositsSince(since)
+      const deposits = await this.fetchDepositsAllPages()
+      this.writeFile(deposits, "deposits")
+      return deposits
+    }
   }
 
   // fetchWithdrawals
   public async fetchWithdrawals(since) {
-    // const withdrawals = await this.exchange.fetchWithdrawals()
     const withdrawals = await this.fetchWithdrawalsSince(since)
     this.writeFile(withdrawals, "withdrawals")
     return withdrawals
@@ -314,12 +276,12 @@ export class GenericExchange {
       const params = {
         page: page, // exchange-specific non-unified parameter name
       }
-      const trades = await this.exchange.fetchMyTrades(symbol, since, limit, params)
-      if (trades.length) {
+      const myTrades = await this.exchange.fetchMyTrades(symbol, since, limit, params)
+      if (myTrades.length) {
         // not thread-safu and exchange-specific !
         page = this.exchange.last_json_response["cursor"]
         console.log(`Got fetchMyTrades() page=${page}`)
-        allMyTrades.push(trades)
+        allMyTrades.push(myTrades)
         if (!page) {
           break
         }
@@ -335,10 +297,10 @@ export class GenericExchange {
     let allMyTrades = []
     while (since < this.exchange.milliseconds()) {
       const limit = 100
-      const trades = await this.exchange.fetchMyTrades(symbol, since, limit)
-      if (trades.length) {
-        since = trades[trades.length - 1]["timestamp"] + 1
-        allMyTrades = allMyTrades.concat(trades)
+      const myTrades = await this.exchange.fetchMyTrades(symbol, since, limit)
+      if (myTrades.length) {
+        since = myTrades[myTrades.length - 1]["timestamp"] + 1
+        allMyTrades = allMyTrades.concat(myTrades)
       } else {
         break
       }
@@ -357,12 +319,12 @@ export class GenericExchange {
       const params = {
         page: page, // exchange-specific non-unified parameter name
       }
-      const trades = await this.exchange.fetchDeposits(code, since, limit, params)
-      if (trades.length) {
+      const deposits = await this.exchange.fetchDeposits(code, since, limit, params)
+      if (deposits.length) {
         // not thread-safu and exchange-specific !
         page = this.exchange.last_json_response["cursor"]
         console.log(`Got fetchDeposits() page=${page}`)
-        allDeposits.push(trades)
+        allDeposits.push(deposits)
         if (!page) {
           break
         }
@@ -379,10 +341,10 @@ export class GenericExchange {
     while (since < this.exchange.milliseconds()) {
       const code = undefined
       const limit = 100
-      const trades = await this.exchange.fetchDeposits(code, since, limit)
-      if (trades.length) {
-        since = trades[trades.length - 1]["timestamp"] + 1
-        allDeposits = allDeposits.concat(trades)
+      const deposits = await this.exchange.fetchDeposits(code, since, limit)
+      if (deposits.length) {
+        since = deposits[deposits.length - 1]["timestamp"] + 1
+        allDeposits = allDeposits.concat(deposits)
       } else {
         break
       }
@@ -401,12 +363,12 @@ export class GenericExchange {
       const params = {
         page: page, // exchange-specific non-unified parameter name
       }
-      const trades = await this.exchange.fetchWithdrawals(code, since, limit, params)
-      if (trades.length) {
+      const withdrawals = await this.exchange.fetchWithdrawals(code, since, limit, params)
+      if (withdrawals.length) {
         // not thread-safu and exchange-specific !
         page = this.exchange.last_json_response["cursor"]
         console.log(`Got fetchWithdrawals() page=${page}`)
-        allWithdrawals.push(trades)
+        allWithdrawals.push(withdrawals)
         if (!page) {
           break
         }
@@ -423,10 +385,10 @@ export class GenericExchange {
     while (since < this.exchange.milliseconds()) {
       const code = undefined
       const limit = 100
-      const trades = await this.exchange.fetchWithdrawals(code, since, limit)
-      if (trades.length) {
-        since = trades[trades.length - 1]["timestamp"] + 1
-        allWithdrawals = allWithdrawals.concat(trades)
+      const withdrawals = await this.exchange.fetchWithdrawals(code, since, limit)
+      if (withdrawals.length) {
+        since = withdrawals[withdrawals.length - 1]["timestamp"] + 1
+        allWithdrawals = allWithdrawals.concat(withdrawals)
       } else {
         break
       }
